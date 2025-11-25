@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const IntegrationSchema = new mongoose.Schema({
   provider: { type: String, default: "github", index: true },
 
-  accessToken: { type: String }, // encrypt or vault in production
+  accessToken: { type: String },
   refreshToken: { type: String },
   tokenType: String,
   scope: String,
