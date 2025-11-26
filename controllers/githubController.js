@@ -15,7 +15,7 @@ export async function startAuth(req, res) {
 }
 
 export async function authCallback(req, res) {
-  const { code /*, state */ } = req.query;
+  const { code } = req.query;
   if (!code) return res.status(400).send("Missing code");
 
   // Exchange code for access token

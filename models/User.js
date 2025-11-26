@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   html_url: String,
   avatar_url: String,
   type: String,
+  org: String,
 
   integrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Integration', index: true },
   fetchedAt: { type: Date, default: Date.now }

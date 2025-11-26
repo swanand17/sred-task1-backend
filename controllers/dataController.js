@@ -19,6 +19,15 @@ export async function listCollections(req, res) {
   });
 }
 
+const searchFieldsMap = {
+  github_repos: ["name", "full_name", "description"],
+  github_orgs: ["login", "description"],
+  github_commits: ["commit.message", "commit.author.name"],
+  github_pulls: ["title", "body", "user.login"],
+  github_issues: ["title", "body", "user.login"],
+  github_users: ["login"]
+};
+
 export async function queryCollection(req, res) {
   try {
     const {
@@ -44,17 +53,13 @@ export async function queryCollection(req, res) {
 
     const mongoQuery = {};
 
+    
     // GLOBAL SEARCH
     if (search && search.trim() !== "") {
-      const regex = new RegExp(search, "i");
-      mongoQuery.$or = [
-        { name: regex },
-        { full_name: regex },
-        { title: regex },
-        { body: regex },
-        { message: regex },
-        { login: regex }
-      ];
+      const regex = new RegExp(search.trim(), "i");
+      const fields = searchFieldsMap[collection] || [];
+
+      mongoQuery.$or = fields.map(f => ({ [f]: regex }));
     }
 
     // COLUMN FILTERS
@@ -63,10 +68,10 @@ export async function queryCollection(req, res) {
     // TOTAL COUNT
     const total = await Model.countDocuments(mongoQuery);
 
-    // SORTING FIX (AG Grid uses colId)
+    // SORTING
     let mongoSort = {};
-    if (sort && sort.colId) {
-      mongoSort[sort.colId] = sort.sort === "asc" ? 1 : -1;
+    if (sort && sort.field) {
+      mongoSort[sort.field] = (sort.sort || sort.direction) === "asc" ? 1 : -1;
     }
 
     const docs = await Model.find(mongoQuery)
